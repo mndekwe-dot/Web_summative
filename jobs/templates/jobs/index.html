@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Job Market Skills Dashboard</title>
+  <title>KigaliJobs — Rwanda & Africa Job Market Dashboard</title>
   {% load static %}
   <link rel="stylesheet" href="{% static 'css/style.css' %}" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
@@ -13,107 +13,323 @@
   <!-- HEADER -->
   <header class="header">
     <div class="header-inner">
-      <div class="logo">
-        <span class="logo-icon">&#128188;</span>
-        <span class="logo-text">JobMarket<strong>Dashboard</strong></span>
+      <div class="header-top">
+        <div class="logo">
+          <span class="logo-flag">🇷🇼</span>
+          <span class="logo-text">Kigali<strong>Jobs</strong></span>
+        </div>
+        <div class="header-badges">
+          <span class="hbadge">🌍 Rwanda</span>
+          <span class="hbadge">🌐 Africa</span>
+          <span class="hbadge">💻 Remote</span>
+        </div>
       </div>
-      <p class="tagline">Discover what skills employers are looking for — right now.</p>
+      <p class="tagline">Your gateway to jobs in Rwanda, across Africa &amp; remote opportunities worldwide</p>
+    </div>
+
+    <!-- MODE TABS -->
+    <div class="mode-tabs-wrap">
+      <div class="mode-tabs container">
+        <button class="mode-btn active" data-mode="global">
+          🌐 <span>Global Jobs</span>
+        </button>
+        <button class="mode-btn" data-mode="africa">
+          🌍 <span>Africa &amp; Rwanda</span>
+        </button>
+        <button class="mode-btn" data-mode="remote">
+          💻 <span>Remote Jobs</span>
+        </button>
+      </div>
     </div>
   </header>
 
-  <!-- SEARCH SECTION -->
-  <section class="search-section">
-    <div class="container">
-      <div class="search-card">
-        <h2 class="search-title">Search Jobs</h2>
-        <div class="search-row">
-          <input
-            type="text"
-            id="queryInput"
-            class="input"
-            placeholder="Job title or keyword (e.g. Python Developer)"
-          />
-          <select id="countrySelect" class="select"></select>
-          <button id="searchBtn" class="btn btn-primary">Search</button>
-        </div>
+  <!-- ══════════════════════════════════════════════
+       MODE: GLOBAL (Adzuna)
+  ══════════════════════════════════════════════ -->
+  <div id="mode-global" class="mode-panel">
+    <section class="search-section">
+      <div class="container">
+        <div class="search-card">
+          <h2 class="search-title">Search Jobs Worldwide</h2>
 
-        <!-- FILTERS -->
-        <div class="filters-row">
-          <div class="filter-group">
-            <label class="filter-label">Min Salary</label>
-            <input type="number" id="salaryMin" class="input input-sm" placeholder="e.g. 30000" />
-          </div>
-          <div class="filter-group">
-            <label class="filter-label">Max Salary</label>
-            <input type="number" id="salaryMax" class="input input-sm" placeholder="e.g. 80000" />
-          </div>
-          <div class="filter-group">
-            <label class="filter-label">Sort By</label>
-            <select id="sortBy" class="select select-sm">
-              <option value="relevance">Relevance</option>
-              <option value="date">Date</option>
-              <option value="salary">Salary</option>
+          <!-- Popular Jobs Quick Pick -->
+          <div class="popular-row">
+            <span class="popular-label">Popular:</span>
+            <select id="popularJobs" class="select select-sm">
+              <option value="">-- Quick pick a role --</option>
+              <optgroup label="🖥️ Technology">
+                <option value="Software Engineer">Software Engineer</option>
+                <option value="Frontend Developer">Frontend Developer</option>
+                <option value="Backend Developer">Backend Developer</option>
+                <option value="Full Stack Developer">Full Stack Developer</option>
+                <option value="Data Scientist">Data Scientist</option>
+                <option value="Data Analyst">Data Analyst</option>
+                <option value="Machine Learning Engineer">Machine Learning Engineer</option>
+                <option value="DevOps Engineer">DevOps Engineer</option>
+                <option value="Cloud Engineer">Cloud Engineer</option>
+                <option value="Cybersecurity Analyst">Cybersecurity Analyst</option>
+                <option value="Mobile Developer">Mobile Developer</option>
+                <option value="UI UX Designer">UI/UX Designer</option>
+              </optgroup>
+              <optgroup label="📊 Business & Finance">
+                <option value="Business Analyst">Business Analyst</option>
+                <option value="Financial Analyst">Financial Analyst</option>
+                <option value="Accountant">Accountant</option>
+                <option value="Project Manager">Project Manager</option>
+                <option value="Product Manager">Product Manager</option>
+                <option value="Sales Manager">Sales Manager</option>
+              </optgroup>
+              <optgroup label="🌍 Africa & Rwanda Demand">
+                <option value="Agronomist">Agronomist</option>
+                <option value="Public Health Officer">Public Health Officer</option>
+                <option value="NGO Program Officer">NGO Program Officer</option>
+                <option value="Monitoring and Evaluation Officer">M&amp;E Officer</option>
+                <option value="Microfinance Officer">Microfinance Officer</option>
+                <option value="Supply Chain Manager">Supply Chain Manager</option>
+                <option value="Civil Engineer">Civil Engineer</option>
+              </optgroup>
+              <optgroup label="✍️ Other">
+                <option value="Marketing Manager">Marketing Manager</option>
+                <option value="Human Resources Manager">HR Manager</option>
+                <option value="Content Writer">Content Writer</option>
+                <option value="Graphic Designer">Graphic Designer</option>
+                <option value="Nurse">Nurse</option>
+                <option value="Teacher">Teacher</option>
+              </optgroup>
             </select>
           </div>
-          <div class="filter-group filter-check">
-            <label class="checkbox-label">
-              <input type="checkbox" id="fullTimeOnly" />
-              Full-time only
-            </label>
+
+          <div class="search-row">
+            <input type="text" id="queryInput" class="input" placeholder="Job title or keyword (e.g. Software Engineer)" />
+            <select id="countrySelect" class="select"></select>
+            <button id="searchBtn" class="btn btn-primary">Search</button>
           </div>
-          <div class="filter-group">
-            <label class="filter-label">Results</label>
-            <select id="resultsPerPage" class="select select-sm">
+          <div class="filters-row">
+            <div class="filter-group">
+              <label class="filter-label">Min Salary</label>
+              <input type="number" id="salaryMin" class="input input-sm" placeholder="e.g. 30000" />
+            </div>
+            <div class="filter-group">
+              <label class="filter-label">Max Salary</label>
+              <input type="number" id="salaryMax" class="input input-sm" placeholder="e.g. 80000" />
+            </div>
+            <div class="filter-group">
+              <label class="filter-label">Sort By</label>
+              <select id="sortBy" class="select select-sm">
+                <option value="relevance">Relevance</option>
+                <option value="date">Date</option>
+                <option value="salary">Salary</option>
+              </select>
+            </div>
+            <div class="filter-group filter-check">
+              <label class="checkbox-label">
+                <input type="checkbox" id="fullTimeOnly" /> Full-time only
+              </label>
+            </div>
+            <div class="filter-group">
+              <label class="filter-label">Results</label>
+              <select id="resultsPerPage" class="select select-sm">
+                <option value="10">10</option>
+                <option value="20" selected>20</option>
+                <option value="50">50</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="container"><div id="errorBanner" class="error-banner hidden"></div></div>
+
+    <div class="container" id="statsBar" style="display:none;">
+      <div class="stats-bar">
+        <span id="totalResults">0 jobs found</span>
+        <span id="searchSummary"></span>
+      </div>
+    </div>
+
+    <main class="container main-grid" id="mainContent" style="display:none;">
+      <section class="results-section">
+        <div class="section-header"><h3>Job Listings</h3></div>
+        <div id="jobList" class="job-list"></div>
+        <div id="pagination" class="pagination"></div>
+      </section>
+
+      <aside class="skills-section">
+        <div class="tab-bar">
+          <button class="tab-btn active" data-tab="skills">Skills</button>
+          <button class="tab-btn" data-tab="salary">Salary</button>
+          <button class="tab-btn" data-tab="companies">Companies</button>
+        </div>
+        <div id="tab-skills" class="tab-panel">
+          <div class="section-header">
+            <h3>Top Skills in Demand</h3>
+            <span id="skillsJobCount" class="badge"></span>
+          </div>
+          <div class="chart-wrapper"><canvas id="skillsChart"></canvas></div>
+          <p id="noSkills" class="no-data hidden">No skill data found.</p>
+        </div>
+        <div id="tab-salary" class="tab-panel hidden">
+          <div class="section-header">
+            <h3>Salary Distribution</h3>
+            <span id="salaryBadge" class="badge"></span>
+          </div>
+          <div class="chart-wrapper"><canvas id="salaryChart"></canvas></div>
+          <p id="noSalary" class="no-data hidden">No salary data found.</p>
+        </div>
+        <div id="tab-companies" class="tab-panel hidden">
+          <div class="section-header">
+            <h3>Top Hiring Companies</h3>
+            <span id="companiesBadge" class="badge"></span>
+          </div>
+          <div id="companiesTable"></div>
+          <p id="noCompanies" class="no-data hidden">No company data found.</p>
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       MODE: AFRICA & RWANDA (JSearch)
+  ══════════════════════════════════════════════ -->
+  <div id="mode-africa" class="mode-panel hidden">
+    <section class="search-section">
+      <div class="container">
+        <div class="search-card africa-card">
+          <div class="africa-hero">
+            <h2 class="search-title">Jobs in Rwanda &amp; Africa 🌍</h2>
+            <p class="africa-sub">Powered by LinkedIn &amp; Indeed — real jobs posted in African cities</p>
+          </div>
+          <!-- Popular Jobs Quick Pick (Africa) -->
+          <div class="popular-row">
+            <span class="popular-label">Popular in Africa:</span>
+            <select id="africaPopularJobs" class="select select-sm">
+              <option value="">-- Quick pick a role --</option>
+              <optgroup label="🌍 High Demand in Rwanda & Africa">
+                <option value="Software Developer">Software Developer</option>
+                <option value="Data Analyst">Data Analyst</option>
+                <option value="Project Manager">Project Manager</option>
+                <option value="NGO Program Officer">NGO Program Officer</option>
+                <option value="Public Health Officer">Public Health Officer</option>
+                <option value="Monitoring and Evaluation Officer">M&amp;E Officer</option>
+                <option value="Agronomist">Agronomist</option>
+                <option value="Civil Engineer">Civil Engineer</option>
+                <option value="Accountant">Accountant</option>
+                <option value="Microfinance Officer">Microfinance Officer</option>
+                <option value="Supply Chain Manager">Supply Chain Manager</option>
+                <option value="Teacher">Teacher</option>
+                <option value="Nurse">Nurse</option>
+              </optgroup>
+              <optgroup label="🖥️ Tech Roles">
+                <option value="Frontend Developer">Frontend Developer</option>
+                <option value="Backend Developer">Backend Developer</option>
+                <option value="DevOps Engineer">DevOps Engineer</option>
+                <option value="UI UX Designer">UI/UX Designer</option>
+                <option value="Cybersecurity Analyst">Cybersecurity Analyst</option>
+              </optgroup>
+              <optgroup label="📊 Business">
+                <option value="Business Analyst">Business Analyst</option>
+                <option value="Financial Analyst">Financial Analyst</option>
+                <option value="Marketing Manager">Marketing Manager</option>
+                <option value="Human Resources Manager">HR Manager</option>
+              </optgroup>
+            </select>
+          </div>
+
+          <div class="search-row">
+            <input type="text" id="africaQuery" class="input" placeholder="Job title (e.g. Data Analyst, Marketing Manager)" />
+            <select id="africaLocation" class="select">
+              <option value="Rwanda">🇷🇼 Rwanda</option>
+              <option value="Kigali, Rwanda">🏙️ Kigali, Rwanda</option>
+              <option value="Kenya">🇰🇪 Kenya</option>
+              <option value="Nairobi, Kenya">🏙️ Nairobi, Kenya</option>
+              <option value="Nigeria">🇳🇬 Nigeria</option>
+              <option value="Lagos, Nigeria">🏙️ Lagos, Nigeria</option>
+              <option value="South Africa">🇿🇦 South Africa</option>
+              <option value="Ghana">🇬🇭 Ghana</option>
+              <option value="Tanzania">🇹🇿 Tanzania</option>
+              <option value="Uganda">🇺🇬 Uganda</option>
+              <option value="Ethiopia">🇪🇹 Ethiopia</option>
+              <option value="Egypt">🇪🇬 Egypt</option>
+              <option value="Morocco">🇲🇦 Morocco</option>
+              <option value="Senegal">🇸🇳 Senegal</option>
+              <option value="East Africa">🌍 East Africa</option>
+            </select>
+            <select id="africaSortBy" class="select select-sm">
+              <option value="relevance">Relevance</option>
+              <option value="date">Latest First</option>
+            </select>
+            <button id="africaSearchBtn" class="btn btn-africa">Search Africa</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="container"><div id="africaError" class="error-banner hidden"></div></div>
+    <div class="container" id="africaStatsBar" style="display:none;">
+      <div class="stats-bar">
+        <span id="africaTotalResults"></span>
+        <span id="africaSummary"></span>
+      </div>
+    </div>
+    <div class="container" id="africaContent" style="display:none;">
+      <div id="africaJobList" class="job-list"></div>
+      <div id="africaPagination" class="pagination"></div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       MODE: REMOTE JOBS (Remotive)
+  ══════════════════════════════════════════════ -->
+  <div id="mode-remote" class="mode-panel hidden">
+    <section class="search-section">
+      <div class="container">
+        <div class="search-card remote-card">
+          <div class="africa-hero">
+            <h2 class="search-title">Remote Jobs — Work from Kigali 💻</h2>
+            <p class="africa-sub">Find remote-first companies hiring globally — work from anywhere in Rwanda</p>
+          </div>
+          <div class="search-row">
+            <input type="text" id="remoteQuery" class="input" placeholder="Job title or skill (e.g. Python, UX Designer)" />
+            <select id="remoteCategory" class="select">
+              <option value="">All Categories</option>
+              <option value="software-dev">Software Development</option>
+              <option value="data">Data Science & Analytics</option>
+              <option value="devops">DevOps & Sysadmin</option>
+              <option value="design">Design</option>
+              <option value="marketing">Marketing</option>
+              <option value="customer-support">Customer Support</option>
+              <option value="product">Product Management</option>
+              <option value="writing">Writing & Content</option>
+              <option value="finance-legal">Finance & Legal</option>
+            </select>
+            <select id="remoteLimit" class="select select-sm">
               <option value="10">10</option>
               <option value="20" selected>20</option>
               <option value="50">50</option>
             </select>
+            <button id="remoteSearchBtn" class="btn btn-remote">Find Remote Jobs</button>
+          </div>
+          <div class="remote-tip">
+            💡 <strong>Tip for Rwandans:</strong> Look for listings that say "Worldwide", "Africa", or "EMEA" — these are open to applicants in Rwanda.
           </div>
         </div>
       </div>
-    </div>
-  </section>
-
-  <!-- ERROR BANNER -->
-  <div class="container">
-    <div id="errorBanner" class="error-banner hidden"></div>
-  </div>
-
-  <!-- STATS BAR -->
-  <div class="container" id="statsBar" style="display:none;">
-    <div class="stats-bar">
-      <span id="totalResults">0 jobs found</span>
-      <span id="searchSummary"></span>
-    </div>
-  </div>
-
-  <!-- MAIN CONTENT -->
-  <main class="container main-grid" id="mainContent" style="display:none;">
-
-    <!-- LEFT: JOB RESULTS -->
-    <section class="results-section">
-      <div class="section-header">
-        <h3>Job Listings</h3>
-      </div>
-      <div id="jobList" class="job-list"></div>
-      <div id="pagination" class="pagination"></div>
     </section>
 
-    <!-- RIGHT: SKILLS CHART -->
-    <aside class="skills-section">
-      <div class="section-header">
-        <h3>Top Skills in Demand</h3>
-        <span id="skillsJobCount" class="badge"></span>
+    <div class="container"><div id="remoteError" class="error-banner hidden"></div></div>
+    <div class="container" id="remoteStatsBar" style="display:none;">
+      <div class="stats-bar">
+        <span id="remoteTotalResults"></span>
+        <span id="remoteSummary"></span>
       </div>
-      <div class="chart-wrapper">
-        <canvas id="skillsChart"></canvas>
-      </div>
-      <p id="noSkills" class="no-skills hidden">No skill data found for this search.</p>
-    </aside>
+    </div>
+    <div class="container" id="remoteContent" style="display:none;">
+      <div id="remoteJobList" class="job-list remote-grid"></div>
+    </div>
+  </div>
 
-  </main>
-
-  <!-- JOB DETAIL MODAL -->
+  <!-- SHARED: JOB DETAIL MODAL -->
   <div id="jobModal" class="modal-overlay hidden">
     <div class="modal">
       <button class="modal-close" id="modalClose">&times;</button>
@@ -121,7 +337,7 @@
     </div>
   </div>
 
-  <!-- LOADING OVERLAY -->
+  <!-- SHARED: LOADING OVERLAY -->
   <div id="loadingOverlay" class="loading-overlay hidden">
     <div class="spinner"></div>
     <p>Fetching jobs...</p>

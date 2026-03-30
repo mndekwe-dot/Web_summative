@@ -13,6 +13,8 @@ DEBUG = os.getenv('DEBUG', 'True') == 'True'
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
 INSTALLED_APPS = [
+    'django.contrib.contenttypes',
+    'django.contrib.auth',
     'django.contrib.staticfiles',
     'rest_framework',
     'corsheaders',
@@ -22,8 +24,10 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
@@ -43,6 +47,13 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'job_dashboard.wsgi.application'
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
 
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
@@ -72,5 +83,8 @@ CORS_ALLOW_ALL_ORIGINS = DEBUG
 # Adzuna API
 ADZUNA_APP_ID = os.getenv('ADZUNA_APP_ID', '')
 ADZUNA_APP_KEY = os.getenv('ADZUNA_APP_KEY', '')
+
+# JSearch via RapidAPI (Africa/Rwanda jobs)
+RAPIDAPI_KEY = os.getenv('RAPIDAPI_KEY', '')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

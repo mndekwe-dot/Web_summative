@@ -51,7 +51,7 @@ class JobSearchView(APIView):
 
     def get(self, request):
         query = request.query_params.get('query', '').strip()
-        country = request.query_params.get('country', 'gb').strip().lower()
+        country = request.query_params.get('country', 'gb').strip().lower() or 'gb' or 'gb'
         page = request.query_params.get('page', '1')
         salary_min = request.query_params.get('salary_min', '').strip()
         salary_max = request.query_params.get('salary_max', '').strip()
@@ -121,7 +121,7 @@ class SkillsAnalysisView(APIView):
 
     def get(self, request):
         query = request.query_params.get('query', '').strip()
-        country = request.query_params.get('country', 'gb').strip().lower()
+        country = request.query_params.get('country', 'gb').strip().lower() or 'gb'
 
         if not query:
             return Response(
@@ -167,7 +167,7 @@ class SalaryInsightView(APIView):
 
     def get(self, request):
         query = request.query_params.get('query', '').strip()
-        country = request.query_params.get('country', 'gb').strip().lower()
+        country = request.query_params.get('country', 'gb').strip().lower() or 'gb'
 
         if not query:
             return Response(
@@ -179,6 +179,128 @@ class SalaryInsightView(APIView):
 
         try:
             url = f'{ADZUNA_BASE_URL}/{country}/histogram'
+            response = requests.get(url, params=params, timeout=10)
+            response.raise_for_status()
+            return Response(response.json())
+        except (
+            requests.exceptions.ConnectionError,
+            requests.exceptions.Timeout,
+            requests.exceptions.HTTPError,
+        ) as exc:
+            return _handle_request_errors(exc)
+
+
+class JSearchView(APIView):
+    """
+    GET /api/jobs/africa/
+    Query params: query, location, page
+    Searches LinkedIn/Indeed for jobs in Rwanda and Africa via JSearch (RapidAPI).
+    """
+
+    def get(self, request):
+        query = request.query_params.get('query', '').strip()
+        location = request.query_params.get('location', 'Rwanda').strip() or 'Rwanda'
+        page = request.query_params.get('page', '1')
+
+        if not query:
+            return Response(
+                {'error': 'Please provide a job title or keyword.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            page = max(1, int(page))
+        except ValueError:
+            page = 1
+
+        headers = {
+            'X-RapidAPI-Key': settings.RAPIDAPI_KEY,
+            'X-RapidAPI-Host': 'jsearch.p.rapidapi.com',
+        }
+        params = {
+            'query': f'{query} in {location}',
+            'page': page,
+            'num_pages': 1,
+            'date_posted': 'all',
+        }
+
+        try:
+            response = requests.get(
+                'https://jsearch.p.rapidapi.com/search',
+                headers=headers,
+                params=params,
+                timeout=10,
+            )
+            response.raise_for_status()
+            return Response(response.json())
+        except (
+            requests.exceptions.ConnectionError,
+            requests.exceptions.Timeout,
+            requests.exceptions.HTTPError,
+        ) as exc:
+            return _handle_request_errors(exc)
+
+
+class RemotiveView(APIView):
+    """
+    GET /api/jobs/remote/
+    Query params: search, category, limit
+    Fetches remote jobs from Remotive — no API key required.
+    """
+
+    def get(self, request):
+        search = request.query_params.get('search', '').strip()
+        category = request.query_params.get('category', '').strip()
+        limit = request.query_params.get('limit', '20')
+
+        try:
+            limit = min(100, max(1, int(limit)))
+        except ValueError:
+            limit = 20
+
+        params = {'limit': limit}
+        if search:
+            params['search'] = search
+        if category:
+            params['category'] = category
+
+        try:
+            response = requests.get(
+                'https://remotive.com/api/remote-jobs',
+                params=params,
+                timeout=15,
+            )
+            response.raise_for_status()
+            return Response(response.json())
+        except (
+            requests.exceptions.ConnectionError,
+            requests.exceptions.Timeout,
+            requests.exceptions.HTTPError,
+        ) as exc:
+            return _handle_request_errors(exc)
+
+
+class TopCompaniesView(APIView):
+    """
+    GET /api/jobs/companies/
+    Query params: query, country
+    Returns the top hiring companies for a given search from Adzuna.
+    """
+
+    def get(self, request):
+        query = request.query_params.get('query', '').strip()
+        country = request.query_params.get('country', 'gb').strip().lower() or 'gb'
+
+        if not query:
+            return Response(
+                {'error': 'Please provide a job title or keyword.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        params = _adzuna_params({'what': query})
+
+        try:
+            url = f'{ADZUNA_BASE_URL}/{country}/top_companies'
             response = requests.get(url, params=params, timeout=10)
             response.raise_for_status()
             return Response(response.json())
