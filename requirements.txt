@@ -3,3 +3,5 @@ djangorestframework
 requests
 python-dotenv
 django-cors-headers
+whitenoise
+gunicorn
