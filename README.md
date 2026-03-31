@@ -351,4 +351,4 @@ GitHub: https://github.com/mndekwe-dot/Web_summative
 
 ## Demo Video
 
-[Link to demo video]
+[[Link to demo video]](https://www.youtube.com/watch?v=xEHSGfZGyHE)
