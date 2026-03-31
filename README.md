@@ -1,6 +1,6 @@
-# 🇷🇼 KigaliJobs — Rwanda & Africa Job Market Dashboard
+# 🇷🇼 KORA — Rwanda & Africa Job Market Dashboard
 
-A web application that helps job seekers find employment opportunities in Rwanda, across Africa, and remote positions worldwide. Built with Django REST Framework and powered by multiple job APIs.
+KORA (meaning "Work" in Kinyarwanda) is a web application that helps job seekers find employment opportunities in Rwanda, across Africa, and remote positions worldwide. Built with Django REST Framework and powered by multiple job APIs.
 
 **Live URL:** http://jobs.imboni.tech
 
@@ -22,7 +22,7 @@ A web application that helps job seekers find employment opportunities in Rwanda
 
 ## Project Overview
 
-KigaliJobs is a job market dashboard designed with Rwanda and Africa in mind. It aggregates real job listings from multiple sources and presents them in an easy-to-use interface. Users can search for jobs globally, filter by African country, or find remote positions they can work from anywhere in Rwanda.
+KORA is a job market dashboard designed with Rwanda and Africa in mind. It aggregates real job listings from multiple sources and presents them in an easy-to-use interface. Users can search for jobs globally, filter by African country, or find remote positions they can work from anywhere in Rwanda.
 
 The application provides three core modes:
 - **Global Jobs** — Search worldwide job listings with salary filters and skill analysis
@@ -44,6 +44,7 @@ The application provides three core modes:
 - Pagination for browsing results
 - Full error handling for API downtime and invalid responses
 - Responsive design with Rwanda flag colour theme
+- About section with developer profile and project story
 
 ---
 
@@ -84,7 +85,6 @@ The application provides three core modes:
 | Static files | WhiteNoise |
 | Production server | Gunicorn |
 | Load balancer | HAProxy |
-| Web server | Nginx |
 | Database | SQLite |
 
 ---
@@ -219,11 +219,11 @@ python manage.py collectstatic --noinput
 
 **7. Create Gunicorn systemd service:**
 ```bash
-sudo nano /etc/systemd/system/kigalijobs.service
+sudo nano /etc/systemd/system/kora.service
 ```
 ```ini
 [Unit]
-Description=KigaliJobs Gunicorn Daemon
+Description=KORA Gunicorn Daemon
 After=network.target
 
 [Service]
@@ -243,9 +243,9 @@ WantedBy=multi-user.target
 **8. Start and enable the service:**
 ```bash
 sudo systemctl daemon-reload
-sudo systemctl start kigalijobs
-sudo systemctl enable kigalijobs
-sudo systemctl status kigalijobs
+sudo systemctl start kora
+sudo systemctl enable kora
+sudo systemctl status kora
 ```
 
 ### Updating the Application
@@ -253,10 +253,10 @@ sudo systemctl status kigalijobs
 To deploy new changes to the servers:
 ```bash
 cd /home/ubuntu/Web_summative
-git pull origin main
+git pull origin master
 source venv/bin/activate
 python manage.py collectstatic --noinput
-sudo systemctl restart kigalijobs
+sudo systemctl restart kora
 ```
 
 ---
@@ -271,16 +271,16 @@ HAProxy configuration (`/etc/haproxy/haproxy.cfg`):
 frontend www-http
     bind *:80
     acl is_jobs hdr(host) -i jobs.imboni.tech
-    use_backend kigalijobs-backend if is_jobs
+    use_backend kora-backend if is_jobs
     redirect scheme https code 301 if !{ ssl_fc } !is_jobs
 
 frontend www-https
     bind *:443 ssl crt /etc/haproxy/certs/www.imboni.tech.pem
     acl is_jobs hdr(host) -i jobs.imboni.tech
-    use_backend kigalijobs-backend if is_jobs
+    use_backend kora-backend if is_jobs
     default_backend web-backend
 
-backend kigalijobs-backend
+backend kora-backend
     balance roundrobin
     server web-01 44.203.152.117:8000 check
     server web-02 54.167.139.121:8000 check
@@ -292,7 +292,7 @@ backend web-backend
 ```
 
 **How it works:**
-- Requests to `jobs.imboni.tech` are routed to the `kigalijobs-backend`
+- Requests to `jobs.imboni.tech` are routed to the `kora-backend`
 - HAProxy uses **round-robin** load balancing — each request alternates between web-01 and web-02
 - If one server goes down, HAProxy automatically routes all traffic to the healthy server
 - The existing web infrastructure is completely unaffected
@@ -313,7 +313,7 @@ sudo systemctl restart haproxy
 
 ### 2. Port Conflicts on Load Balancer
 **Challenge:** The load balancer already had HAProxy running on port 80 for a previous assignment.
-**Solution:** Instead of running a separate Nginx instance (which caused conflicts), we added the KigaliJobs app as a new backend inside the existing HAProxy configuration using ACL rules based on the hostname.
+**Solution:** Instead of running a separate Nginx instance (which caused conflicts), we added KORA as a new backend inside the existing HAProxy configuration using ACL rules based on the hostname.
 
 ### 3. Python Version Confusion
 **Challenge:** Ubuntu server had both Python 2 and Python 3 installed. Running `python` defaulted to Python 2, causing syntax errors with Django.
@@ -321,7 +321,7 @@ sudo systemctl restart haproxy
 
 ### 4. Static Files in Production
 **Challenge:** Django does not serve static files when `DEBUG=False`.
-**Solution:** Added WhiteNoise middleware which allows Django/Gunicorn to serve static files efficiently in production without needing a separate Nginx configuration.
+**Solution:** Added WhiteNoise middleware which allows Django/Gunicorn to serve static files efficiently in production without needing a separate web server configuration.
 
 ### 5. Rwanda/Africa API Coverage
 **Challenge:** The Adzuna API does not cover Rwanda or most African countries.
