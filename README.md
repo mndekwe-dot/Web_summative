@@ -1,4 +1,4 @@
-# 🇷🇼 KORA — Rwanda & Africa Job Market Dashboard
+# KORA — Rwanda & Africa Job Market Dashboard
 
 KORA (meaning "Work" in Kinyarwanda) is a web application that helps job seekers find employment opportunities in Rwanda, across Africa, and remote positions worldwide. Built with Django REST Framework and powered by multiple job APIs.
 
