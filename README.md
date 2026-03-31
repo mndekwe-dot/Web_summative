@@ -2,7 +2,7 @@
 
 KORA (meaning "Work" in Kinyarwanda) is a web application that helps job seekers find employment opportunities in Rwanda, across Africa, and remote positions worldwide. Built with Django REST Framework and powered by multiple job APIs.
 
-**Live URL:** http://jobs.imboni.tech
+**Live URL:** https://jobs.imboni.tech
 
 ---
 
@@ -263,19 +263,72 @@ sudo systemctl restart kora
 
 ## Load Balancer Configuration
 
-The load balancer uses **HAProxy** on lb-01 to distribute traffic between web-01 and web-02.
+The load balancer uses **HAProxy** on lb-01 to distribute traffic between web-01 and web-02. HTTPS is enabled using a free Let's Encrypt SSL certificate for `jobs.imboni.tech`.
 
-HAProxy configuration (`/etc/haproxy/haproxy.cfg`):
+### SSL Certificate Setup (Let's Encrypt)
+
+Run the following on lb-01:
+
+```bash
+# Install certbot
+sudo apt install -y certbot
+
+# Stop HAProxy briefly to free port 80
+sudo systemctl stop haproxy
+
+# Obtain certificate for jobs.imboni.tech
+sudo certbot certonly --standalone -d jobs.imboni.tech
+
+# Restart HAProxy
+sudo systemctl start haproxy
+
+# Combine cert + key into a single PEM file for HAProxy
+sudo cat /etc/letsencrypt/live/jobs.imboni.tech/fullchain.pem \
+         /etc/letsencrypt/live/jobs.imboni.tech/privkey.pem \
+| sudo tee /etc/haproxy/certs/jobs.imboni.tech.pem
+```
+
+### HAProxy Configuration
+
+Full configuration (`/etc/haproxy/haproxy.cfg`):
 
 ```haproxy
+global
+    log /dev/log local0
+    log /dev/log local1 notice
+    chroot /var/lib/haproxy
+    stats socket /run/haproxy/admin.sock mode 660 level admin
+    stats timeout 30s
+    user haproxy
+    group haproxy
+    daemon
+    tune.ssl.default-dh-param 2048
+
+defaults
+    log global
+    mode http
+    option httplog
+    option dontlognull
+    timeout connect 5000
+    timeout client 50000
+    timeout server 50000
+    errorfile 400 /etc/haproxy/errors/400.http
+    errorfile 403 /etc/haproxy/errors/403.http
+    errorfile 408 /etc/haproxy/errors/408.http
+    errorfile 500 /etc/haproxy/errors/500.http
+    errorfile 502 /etc/haproxy/errors/502.http
+    errorfile 503 /etc/haproxy/errors/503.http
+    errorfile 504 /etc/haproxy/errors/504.http
+
 frontend www-http
     bind *:80
     acl is_jobs hdr(host) -i jobs.imboni.tech
-    use_backend kora-backend if is_jobs
-    redirect scheme https code 301 if !{ ssl_fc } !is_jobs
+    redirect scheme https code 301 if is_jobs
+    default_backend web-backend
 
 frontend www-https
-    bind *:443 ssl crt /etc/haproxy/certs/www.imboni.tech.pem
+    bind *:443 ssl crt /etc/haproxy/certs/www.imboni.tech.pem crt /etc/haproxy/certs/jobs.imboni.tech.pem
+    http-request add-header X-Forwarded-Proto https
     acl is_jobs hdr(host) -i jobs.imboni.tech
     use_backend kora-backend if is_jobs
     default_backend web-backend
@@ -292,12 +345,14 @@ backend web-backend
 ```
 
 **How it works:**
-- Requests to `jobs.imboni.tech` are routed to the `kora-backend`
+- HTTP requests to `jobs.imboni.tech` are automatically redirected to HTTPS (301)
+- HTTPS requests are routed to the `kora-backend` (web-01 and web-02 on port 8000)
 - HAProxy uses **round-robin** load balancing — each request alternates between web-01 and web-02
 - If one server goes down, HAProxy automatically routes all traffic to the healthy server
-- The existing web infrastructure is completely unaffected
+- Two SSL certificates are loaded: one for `www.imboni.tech` (existing) and one for `jobs.imboni.tech` (new)
+- The `X-Forwarded-Proto: https` header is added so Django knows the connection is secure
 
-**Restart HAProxy after config changes:**
+**Apply config changes:**
 ```bash
 sudo haproxy -c -f /etc/haproxy/haproxy.cfg
 sudo systemctl restart haproxy
@@ -326,6 +381,10 @@ sudo systemctl restart haproxy
 ### 5. Rwanda/Africa API Coverage
 **Challenge:** The Adzuna API does not cover Rwanda or most African countries.
 **Solution:** Integrated JSearch API (via RapidAPI) which aggregates LinkedIn and Indeed — both of which have job listings in Rwanda and East Africa. Added Remotive API for remote jobs accessible to Rwandan professionals.
+
+### 6. HTTPS / SSL Configuration
+**Challenge:** The load balancer already had an SSL certificate for `www.imboni.tech` but `jobs.imboni.tech` needed its own certificate. HAProxy was occupying port 80, which certbot needs for domain verification.
+**Solution:** Stopped HAProxy briefly (under 30 seconds), obtained a free Let's Encrypt certificate using certbot standalone mode, combined the cert and key into a single PEM file, and configured HAProxy to load both certificates. HTTP traffic to `jobs.imboni.tech` is now automatically redirected to HTTPS via a 301 redirect rule.
 
 ---
 
